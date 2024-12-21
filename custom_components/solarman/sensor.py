@@ -181,10 +181,10 @@ class SolarmanSensor:
 
 
 class SolarmanStatus(SolarmanSensor, Entity):
-    def __init__(self, inverter_name, inverter, field_name, sn):
+    def __init__(self, inverter_name, inverter: Inverter, field_name, sn):
         super().__init__(sn, inverter_name, inverter.lookup_file)
         self._inverter_name = inverter_name
-        self.inverter = inverter
+        self.inverter: Inverter = inverter
         self._field_name = field_name
         self.p_state = None
         self.p_icon = "mdi:magnify"
@@ -220,6 +220,9 @@ class SolarmanStatus(SolarmanSensor, Entity):
     def update(self):
         self.p_state = getattr(self.inverter, self._field_name, None)
 
+    async def async_update(self):
+        self.p_state = getattr(self.inverter, self._field_name, None)
+
 
 ##############################################################################
 # This is the the same of SolarmanStatus, but it has EntityCategory setup
@@ -251,11 +254,11 @@ class SolarmanSensorText(SolarmanStatus):
             self.p_icon = ""
         return
 
-    def update(self):
+    async def async_update(self):
         #  Update this sensor using the data.
         #  Get the latest data and use it to update our sensor state.
         #  Retrieve the sensor data from actual interface
-        self.inverter.update()
+        await self.inverter.async_update()
 
         val = self.inverter.get_current_val()
         if val is not None:
