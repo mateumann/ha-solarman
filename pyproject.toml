@@ -1,0 +1,56 @@
+[project]
+name = "ha-solarman"
+version = "1.6.1"
+description = "abc"
+#readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Jonathan McCrohan", email = "jmccrohan@gmail.com" },
+    { name = "Mateusz Neumann", email = "mateumann@gmail.com" },
+]
+keywords = ["solarman", "igen-tech", "modbus", "solar", "inverter", "solarmanv5"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "umodbus",
+    "pyyaml",
+    "homeassistant",
+    "pysolarmanv5",
+]
+
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+# Same as Black.
+line-length = 79
+indent-width = 4
+
+# Assume Python 3.9
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.setuptools]
+packages = ["home_assistant_solarman"]
+
+#[tool.flake8]
+#max-line-length = 100
+#ignore = ["E231", "E241"]
+#per-file-ignores = { "__init__.py" = ["F401"] }
+#count = true

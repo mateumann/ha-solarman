@@ -1,14 +1,14 @@
 import asyncio
 import logging
 import threading
-import yaml
-
-from homeassistant.util import Throttle
+import typing as t
 from datetime import datetime
-from .parser import ParameterParser
-from .const import MIN_TIME_BETWEEN_UPDATES
+
+import yaml
+from homeassistant.util import Throttle
 from pysolarmanv5 import PySolarmanV5
 
+from . import const, parser
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ QUERY_RETRY_ATTEMPTS = 2
 
 
 class Inverter:
-    async def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
+    def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
         self._modbus = None
         self._serial = serial
         self.path = path
@@ -28,23 +28,24 @@ class Inverter:
         self.status_lastUpdate = "N/A"
         self.lookup_file = lookup_file
         self.lock = threading.Lock()
+        self._parameter_definition = None
 
         if not self.lookup_file or lookup_file == "parameters.yaml":
             self.lookup_file = "deye_hybrid.yaml"
 
-    def blocking_read_parameter_definition(self, filename: str) -> None:
-        log.debug("Reading solarman parameters from %s", filename)
-        with open(filename) as f:
-            self._parameter_definition = yaml.full_load(f)
+    async def read_parameter_definition(self) -> dict[str, t.Any]:
+        def blocking_read_parameter_definition(filename: str) -> None:
+            log.debug("Reading solarman parameters from %s", filename)
+            with open(filename) as f:
+                self._parameter_definition = yaml.full_load(f)
 
-    @property
-    async def parameter_definition(self):
-        if not self._parameter_definition:
+        if self._parameter_definition is None:
             await asyncio.get_running_loop().run_in_executor(
                 None,
-                self.blocking_read_parameter_definition,
+                blocking_read_parameter_definition,
                 self.path + self.lookup_file,
             )
+
         return self._parameter_definition
 
     @property
@@ -57,7 +58,9 @@ class Inverter:
     def connect_to_server(self):
         if self._modbus:
             return self._modbus
-        log.info(f"Connecting to solarman data logger {self._host}:{self._port}")
+        log.info(
+            f"Connecting to solarman data logger {self._host}:{self._port}"
+        )
         self._modbus = PySolarmanV5(
             self._host,
             self._serial,
@@ -72,7 +75,8 @@ class Inverter:
         if self._modbus:
             try:
                 log.info(
-                    f"Disconnecting from solarman data logger {self._host}:{self._port}"
+                    "Disconnecting from solarman data logger "
+                    f"{self._host}:{self._port}"
                 )
                 self._modbus.disconnect()
             finally:
@@ -91,15 +95,16 @@ class Inverter:
                 )
         params.parse(response, start, length)
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
-    def update(self):
-        self.get_statistics()
+    @Throttle(const.MIN_TIME_BETWEEN_UPDATES)
+    async def update(self):
+        await self.get_statistics()
         return
 
-    def get_statistics(self):
+    async def get_statistics(self):
         result = 1
-        params = ParameterParser(self.parameter_definition)
-        requests = self.parameter_definition["requests"]
+        parameters = await self.read_parameter_definition()
+        params = parser.ParameterParser(parameters)
+        requests = parameters["requests"]
         log.debug(f"Starting to query for [{len(requests)}] ranges...")
 
         with self.lock:
@@ -121,27 +126,44 @@ class Inverter:
                         except Exception as e:
                             result = 0
                             log.log(
-                                (logging.WARNING if isConnected else logging.DEBUG),
-                                f"Querying [{start} - {end}] failed with exception [{type(e).__name__}: {e}]",
+                                (
+                                    logging.WARNING
+                                    if isConnected
+                                    else logging.DEBUG
+                                ),
+                                f"Querying [{start} - {end}] failed with "
+                                f"exception [{type(e).__name__}: {e}]",
                             )
                             self.disconnect_from_server()
                         if result == 0:
                             log.log(
-                                (logging.WARNING if isConnected else logging.DEBUG),
-                                f"Querying [{start} - {end}] failed, [{attempts_left}] retry attempts left",
+                                (
+                                    logging.WARNING
+                                    if isConnected
+                                    else logging.DEBUG
+                                ),
+                                f"Querying [{start} - {end}] failed, "
+                                f"[{attempts_left}] retry attempts left",
                             )
                         else:
                             log.debug(f"Querying [{start} - {end}] succeeded")
                             break
                     if result == 0:
                         log.log(
-                            (logging.WARNING if isConnected else logging.DEBUG),
-                            f"Querying registers [{start} - {end}] failed, aborting.",
+                            (
+                                logging.WARNING
+                                if isConnected
+                                else logging.DEBUG
+                            ),
+                            f"Querying registers [{start} - {end}] failed, "
+                            "aborting.",
                         )
                         break
 
                 if result == 1:
-                    log.debug("All queries succeeded, exposing updated values.")
+                    log.debug(
+                        "All queries succeeded, exposing updated values."
+                    )
                     self.status_lastUpdate = datetime.now().strftime(
                         "%m/%d/%Y, %H:%M:%S"
                     )
@@ -149,24 +171,30 @@ class Inverter:
                     self._current_val = params.get_result()
                 else:
                     self._status_connection = 0
-                    # Clear cached previous results to not report stale and incorrect data
+                    # Clear cached previous results to not report stale
+                    # and incorrect data
                     self._current_val = {}
                     self.disconnect_from_server()
             except Exception as e:
                 log.warning(
-                    f"Querying inverter {self._serial} at {self._host}:{self._port} failed on connection start with exception [{type(e).__name__}: {e}]"
+                    f"Querying inverter {self._serial} at "
+                    f"{self._host}:{self._port} failed on connection start "
+                    f"with exception [{type(e).__name__}: {e}]"
                 )
                 self._status_connection = 0
-                # Clear cached previous results to not report stale and incorrect data
+                # Clear cached previous results to not report stale
+                # and incorrect data
                 self._current_val = {}
                 self.disconnect_from_server()
 
     def get_current_val(self):
         return self._current_val
 
-    def get_sensors(self):
-        params = ParameterParser(self.parameter_definition)
-        return params.get_sensors()
+    async def get_sensors(self):
+        parameters = await self.read_parameter_definition()
+        params = parser.ParameterParser(parameters)
+        for param in params.get_sensors():
+            yield param
 
     # Service calls
     def service_read_holding_register(self, register):
@@ -178,13 +206,15 @@ class Inverter:
                 self.connect_to_server()
                 response = self._modbus.read_holding_registers(register, 1)
                 log.info(
-                    f"Service Call: read_holding_registers : [{register}] value [{response}]"
+                    f"Service Call: read_holding_registers : [{register}] "
+                    f"value [{response}]"
                 )
                 if not wasConnected:
                     self.disconnect_from_server()
             except Exception as e:
                 log.warning(
-                    f"Service Call: read_holding_registers : [{register}] failed with exception [{type(e).__name__}: {e}]"
+                    f"Service Call: read_holding_registers : [{register}] "
+                    f"failed with exception [{type(e).__name__}: {e}]"
                 )
                 self.disconnect_from_server()
                 raise e
@@ -193,7 +223,8 @@ class Inverter:
 
     def service_read_multiple_holding_registers(self, register, count):
         log.debug(
-            f"Service Call: read_holding_register : [{register}], count : {count}"
+            f"Service Call: read_holding_register : [{register}], "
+            f"count : {count}"
         )
 
         with self.lock:
@@ -202,13 +233,15 @@ class Inverter:
                 self.connect_to_server()
                 response = self._modbus.read_holding_registers(register, count)
                 log.info(
-                    f"Service Call: read_holding_registers : [{register}] value [{response}]"
+                    f"Service Call: read_holding_registers : [{register}] "
+                    f"value [{response}]"
                 )
                 if not wasConnected:
                     self.disconnect_from_server()
             except Exception as e:
                 log.warning(
-                    f"Service Call: read_holding_registers : [{register}] failed with exception [{type(e).__name__}: {e}]"
+                    f"Service Call: read_holding_registers : [{register}] "
+                    f"failed with exception [{type(e).__name__}: {e}]"
                 )
                 self.disconnect_from_server()
                 raise e
@@ -217,7 +250,8 @@ class Inverter:
 
     def service_write_holding_register(self, register, value):
         log.debug(
-            f"Service Call: write_holding_register : [{register}], value : [{value}]"
+            f"Service Call: write_holding_register : [{register}], "
+            f"value : [{value}]"
         )
         with self.lock:
             try:
@@ -228,7 +262,9 @@ class Inverter:
                     self.disconnect_from_server()
             except Exception as e:
                 log.warning(
-                    f"Service Call: write_holding_register : [{register}], value : [{value}] failed with exception [{type(e).__name__}: {e}]"
+                    f"Service Call: write_holding_register : [{register}], "
+                    f"value : [{value}] failed with exception "
+                    f"[{type(e).__name__}: {e}]"
                 )
                 self.disconnect_from_server()
                 raise e
@@ -236,7 +272,8 @@ class Inverter:
 
     def service_write_multiple_holding_registers(self, register, values):
         log.debug(
-            f"Service Call: write_multiple_holding_registers: [{register}], values : [{values}]"
+            "Service Call: write_multiple_holding_registers: "
+            f"[{register}], values : [{values}]"
         )
         with self.lock:
             try:
@@ -247,7 +284,9 @@ class Inverter:
                     self.disconnect_from_server()
             except Exception as e:
                 log.warning(
-                    f"Service Call: write_multiple_holding_registers: [{register}], values : [{values}] failed with exception [{type(e).__name__}: {e}]"
+                    "Service Call: write_multiple_holding_registers: "
+                    f"[{register}], values : [{values}] failed with exception "
+                    f"[{type(e).__name__}: {e}]"
                 )
                 self.disconnect_from_server()
                 raise e
