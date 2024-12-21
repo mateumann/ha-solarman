@@ -16,24 +16,24 @@ from homeassistant.const import CONF_NAME, EntityCategory
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import *
+from .const import DOMAIN
 from .solarman import Inverter
 from .scanner import InverterScanner
-from .services import *
+from .services import CONF_INVERTER_HOST, CONF_INVERTER_MB_SLAVEID, CONF_INVERTER_PORT, CONF_INVERTER_SERIAL, CONF_LOOKUP_FILE, DEFAULT_INVERTER_MB_SLAVEID, register_services
 
 _LOGGER = logging.getLogger(__name__)
 _inverter_scanner = InverterScanner()
 
 
 def _do_setup_platform(hass: HomeAssistant, config, async_add_entities : AddEntitiesCallback):
-    _LOGGER.debug(f'sensor.py:async_setup_platform: {config}') 
-    
+    _LOGGER.debug(f'sensor.py:async_setup_platform: {config}')
+
     inverter_name = config.get(CONF_NAME)
     inverter_host = config.get(CONF_INVERTER_HOST)
     if inverter_host == "0.0.0.0":
         inverter_host = _inverter_scanner.get_ipaddress()
-        
-   
+
+
     inverter_port = config.get(CONF_INVERTER_PORT)
     inverter_sn = config.get(CONF_INVERTER_SERIAL)
     if inverter_sn == 0:
@@ -66,7 +66,7 @@ def _do_setup_platform(hass: HomeAssistant, config, async_add_entities : AddEnti
     hass_sensors.append(SolarmanStatusDiag(inverter_name, inverter, "status_lastUpdate", inverter_sn))
     hass_sensors.append(SolarmanStatusDiag(inverter_name, inverter, "status_connection", inverter_sn))
 
-    _LOGGER.debug(f'sensor.py:_do_setup_platform: async_add_entities')
+    _LOGGER.debug('sensor.py:_do_setup_platform: async_add_entities')
     _LOGGER.debug(hass_sensors)
 
     async_add_entities(hass_sensors)
@@ -74,18 +74,18 @@ def _do_setup_platform(hass: HomeAssistant, config, async_add_entities : AddEnti
     register_services (hass)
 
 
-    
-    
-    
+
+
+
 
 # Set-up from configuration.yaml
 async def async_setup_platform(hass: HomeAssistant, config, async_add_entities : AddEntitiesCallback, discovery_info=None):
-    _LOGGER.debug(f'sensor.py:async_setup_platform: {config}') 
+    _LOGGER.debug(f'sensor.py:async_setup_platform: {config}')
     _do_setup_platform(hass, config, async_add_entities)
-       
+
 # Set-up from the entries in config-flow
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
-    _LOGGER.debug(f'sensor.py:async_setup_entry: {entry.options}') 
+    _LOGGER.debug(f'sensor.py:async_setup_entry: {entry.options}')
     _do_setup_platform(hass, entry.options, async_add_entities)
 
 
@@ -156,7 +156,7 @@ class SolarmanStatus(SolarmanSensor, Entity):
     def state(self):
         #  Return the state of the sensor.
         return self.p_state
-    
+
     def inverter(self):
         #  Return the inverter of the sensor. """
         return self.inverter
@@ -200,7 +200,7 @@ class SolarmanSensorText(SolarmanStatus):
                 self.p_state = val[self._field_name]
             else:
                 uom = getattr(self, 'uom', None)
-                if uom and (re.match("\S+", uom)):
+                if uom and (re.match(r'\S+', uom)):
                     self.p_state = None
                 _LOGGER.debug(f'No value recorded for {self._field_name}')
 
