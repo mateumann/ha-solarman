@@ -16,7 +16,7 @@ QUERY_RETRY_ATTEMPTS = 2
 
 
 class Inverter:
-    def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
+    async def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
         self._modbus = None
         self._serial = serial
         self.path = path
@@ -39,6 +39,7 @@ class Inverter:
         )
 
     def blocking_read_parameter_definition(self, filename: str) -> None:
+        log.debug("Reading solarman parameters from %s", filename)
         with open(filename) as f:
             self.parameter_definition = yaml.full_load(f)
 
