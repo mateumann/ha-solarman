@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import threading
-import yaml
-
-from homeassistant.util import Throttle
 from datetime import datetime
-from .parser import ParameterParser
-from .const import MIN_TIME_BETWEEN_UPDATES
+
+import yaml
+from homeassistant.util import Throttle
 from pysolarmanv5 import PySolarmanV5
+
+from . import const, parser
 
 
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ QUERY_RETRY_ATTEMPTS = 2
 
 
 class Inverter:
-    async def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
+    def __init__(self, path, serial, host, port, mb_slaveid, lookup_file):
         self._modbus = None
         self._serial = serial
         self.path = path
@@ -31,6 +31,14 @@ class Inverter:
 
         if not self.lookup_file or lookup_file == "parameters.yaml":
             self.lookup_file = "deye_hybrid.yaml"
+
+    async def async_setup(hass, config):
+        log.info("Setting up solarman inverter")
+        await asyncio.get_running_loop().run_in_executor(
+            None,
+            self.blocking_read_parameter_definition,
+            self.path + self.lookup_file,
+        )
 
     def blocking_read_parameter_definition(self, filename: str) -> None:
         log.debug("Reading solarman parameters from %s", filename)
@@ -91,14 +99,14 @@ class Inverter:
                 )
         params.parse(response, start, length)
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
+    @Throttle(const.MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         self.get_statistics()
         return
 
     def get_statistics(self):
         result = 1
-        params = ParameterParser(self.parameter_definition)
+        params = parser.ParameterParser(self.parameter_definition)
         requests = self.parameter_definition["requests"]
         log.debug(f"Starting to query for [{len(requests)}] ranges...")
 
@@ -165,7 +173,7 @@ class Inverter:
         return self._current_val
 
     def get_sensors(self):
-        params = ParameterParser(self.parameter_definition)
+        params = parser.ParameterParser(self.parameter_definition)
         return params.get_sensors()
 
     # Service calls

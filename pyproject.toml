@@ -1,0 +1,43 @@
+[project]
+name = "ha-solarman"
+version = "1.6.1"
+description = "abc"
+#readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Jonathan McCrohan", email = "jmccrohan@gmail.com" },
+    { name = "Mateusz Neumann", email = "mateumann@gmail.com" },
+]
+keywords = ["solarman", "igen-tech", "modbus", "solar", "inverter", "solarmanv5"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "umodbus",
+    "pyyaml",
+    "homeassistant",
+    "pysolarmanv5",
+]
+
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["home_assistant_solarman"]
+
+#[tool.pip-compile]
+#dependencies = [
+#    "umodbus",
+#    "pyyaml",
+#    "homeassistant",
+#    "pysolarmanv5",
+#]
+
+#[tool.setuptools.dynamic]
+#dependencies = { file = ["./requirements.txt"] }
+
