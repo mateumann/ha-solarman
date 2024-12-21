@@ -121,7 +121,7 @@ async def async_setup_platform(
     discovery_info=None,
 ):
     _LOGGER.debug(f"sensor.py:async_setup_platform: {config}")
-    _do_setup_platform(hass, config, async_add_entities)
+    await _do_setup_platform(hass, config, async_add_entities)
 
 
 # Set-up from the entries in config-flow
@@ -131,7 +131,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     _LOGGER.debug(f"sensor.py:async_setup_entry: {entry.options}")
-    _do_setup_platform(hass, entry.options, async_add_entities)
+    await _do_setup_platform(hass, entry.options, async_add_entities)
 
 
 ##############################################################################
