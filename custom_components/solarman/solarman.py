@@ -96,7 +96,7 @@ class Inverter:
         params.parse(response, start, length)
 
     @Throttle(const.MIN_TIME_BETWEEN_UPDATES)
-    async def update(self):
+    async def async_update(self):
         await self.get_statistics()
         return
 
