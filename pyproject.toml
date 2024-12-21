@@ -27,17 +27,30 @@ dependencies = [
 requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.ruff]
+# Same as Black.
+line-length = 79
+indent-width = 4
+
+# Assume Python 3.9
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
 [tool.setuptools]
 packages = ["home_assistant_solarman"]
 
-#[tool.pip-compile]
-#dependencies = [
-#    "umodbus",
-#    "pyyaml",
-#    "homeassistant",
-#    "pysolarmanv5",
-#]
-
-#[tool.setuptools.dynamic]
-#dependencies = { file = ["./requirements.txt"] }
-
+#[tool.flake8]
+#max-line-length = 100
+#ignore = ["E231", "E241"]
+#per-file-ignores = { "__init__.py" = ["F401"] }
+#count = true

@@ -3,8 +3,11 @@ import logging
 import voluptuous as vol
 from homeassistant.core import HomeAssistant, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers import config_validation as cv, entity_registry, \
-    entity
+from homeassistant.helpers import (
+    config_validation as cv,
+    entity_registry,
+    entity,
+)
 from homeassistant.helpers.entity_component import EntityComponent
 
 from .const import DOMAIN
@@ -67,7 +70,8 @@ SERVICE_WRITE_MULTIPLE_REGISTERS_SCHEMA = vol.Schema(
             vol.Coerce(int), vol.Range(min=0, max=65535)
         ),
         vol.Required(PARAM_VALUES): vol.All(
-            cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=0, max=65535))]
+            cv.ensure_list,
+            [vol.All(vol.Coerce(int), vol.Range(min=0, max=65535))],
         ),
     }
 )
@@ -84,15 +88,23 @@ def register_services(hass: HomeAssistant):
             domain = entity_id.partition(".")[0]
             entity_comp = hass.data.get("entity_components", {}).get(domain)
             if entity_comp is None:
-                log.info(f"read_holding_register: Component for {entity_id} not loaded")
+                log.info(
+                    f"read_holding_register: Component for {entity_id} "
+                    "not loaded"
+                )
                 continue
 
             if (entity_obj := entity_comp.get_entity(entity_id)) is None:
-                log.info(f"read_holding_register: Entity {entity_id} not found")
+                log.info(
+                    f"read_holding_register: Entity {entity_id} not found"
+                )
                 continue
 
             if (inverter := entity_obj.inverter) is None:
-                log.info(f"read_holding_register: Entity {entity_id} has no inverter")
+                log.info(
+                    f"read_holding_register: Entity {entity_id} "
+                    "has no inverter"
+                )
                 continue
 
             break
@@ -129,7 +141,8 @@ def register_services(hass: HomeAssistant):
 
         try:
             response = inverter.service_read_multiple_holding_registers(
-                register=call.data.get(PARAM_REGISTER), count=call.data.get(PARAM_COUNT)
+                register=call.data.get(PARAM_REGISTER),
+                count=call.data.get(PARAM_COUNT),
             )
         except Exception as e:
             raise ServiceValidationError(
@@ -153,7 +166,8 @@ def register_services(hass: HomeAssistant):
 
         try:
             inverter.service_write_holding_register(
-                register=call.data.get(PARAM_REGISTER), value=call.data.get(PARAM_VALUE)
+                register=call.data.get(PARAM_REGISTER),
+                value=call.data.get(PARAM_VALUE),
             )
         except Exception as e:
             raise ServiceValidationError(
