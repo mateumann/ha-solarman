@@ -31,7 +31,14 @@ class Inverter:
         if not self.lookup_file or lookup_file == 'parameters.yaml':
             self.lookup_file = 'deye_hybrid.yaml'
 
-        with open(self.path + self.lookup_file) as f:
+       await asyncio.get_running_loop().run_in_executor(
+            None,
+            self.blocking_read_parameter_definition,
+            self.path + self.lookup_file,
+        )
+
+    def blocking_read_parameter_definition(filename: str) -> None:
+        with open(filename) as f:
             self.parameter_definition = yaml.full_load(f)
 
     @property
@@ -62,7 +69,7 @@ class Inverter:
                 response  = self._modbus.read_holding_registers(register_addr=start, quantity=length)
             case 4:
                 response  = self._modbus.read_input_registers(register_addr=start, quantity=length)
-        params.parse(response, start, length)        
+        params.parse(response, start, length)
 
 
     @Throttle (MIN_TIME_BETWEEN_UPDATES)
@@ -146,7 +153,7 @@ class Inverter:
                 log.warning(f"Service Call: read_holding_registers : [{register}] failed with exception [{type(e).__name__}: {e}]")
                 self.disconnect_from_server()
                 raise e
-               
+
         return response
 
     def service_read_multiple_holding_registers(self, register, count):
@@ -164,7 +171,7 @@ class Inverter:
                 log.warning(f"Service Call: read_holding_registers : [{register}] failed with exception [{type(e).__name__}: {e}]")
                 self.disconnect_from_server()
                 raise e
-               
+
         return response
 
 
