@@ -32,16 +32,20 @@ class Inverter:
         if not self.lookup_file or lookup_file == "parameters.yaml":
             self.lookup_file = "deye_hybrid.yaml"
 
-        await asyncio.get_running_loop().run_in_executor(
-            None,
-            self.blocking_read_parameter_definition,
-            self.path + self.lookup_file,
-        )
-
     def blocking_read_parameter_definition(self, filename: str) -> None:
         log.debug("Reading solarman parameters from %s", filename)
         with open(filename) as f:
-            self.parameter_definition = yaml.full_load(f)
+            self._parameter_definition = yaml.full_load(f)
+
+    @property
+    async def parameter_definition(self):
+        if not self._parameter_definition:
+            await asyncio.get_running_loop().run_in_executor(
+                None,
+                self.blocking_read_parameter_definition,
+                self.path + self.lookup_file,
+            )
+        return self._parameter_definition
 
     @property
     def status_connection(self):
