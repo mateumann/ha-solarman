@@ -4,47 +4,59 @@
 #
 #    pip-compile --output-file=./requirements.txt pyproject.toml
 #
-acme==3.0.1
+--extra-index-url https://pypi.python.org/simple
+
+acme==3.3.0
     # via hass-nabucasa
-aiodns==3.2.0
-    # via homeassistant
-aiohappyeyeballs==2.4.4
+aiodns==3.4.0
+    # via
+    #   aiohttp-asyncmdnsresolver
+    #   homeassistant
+aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohasupervisor==0.2.1
+aiohasupervisor==0.3.1
     # via homeassistant
-aiohttp==3.11.11
+aiohttp==3.11.18
     # via
     #   aiohasupervisor
+    #   aiohttp-asyncmdnsresolver
     #   aiohttp-cors
     #   aiohttp-fast-zlib
     #   hass-nabucasa
     #   homeassistant
     #   snitun
+aiohttp-asyncmdnsresolver==0.1.1
+    # via homeassistant
 aiohttp-cors==0.7.0
     # via homeassistant
-aiohttp-fast-zlib==0.2.0
+aiohttp-fast-zlib==0.2.3
     # via homeassistant
-aiooui==0.1.7
+aiooui==0.1.9
     # via bluetooth-adapters
-aiosignal==1.3.2
+aiosignal==1.4.0
     # via aiohttp
-aiozoneinfo==0.2.1
+aiozoneinfo==0.2.3
     # via homeassistant
-anyio==4.7.0
+annotatedyaml==0.4.5
+    # via homeassistant
+anyio==4.11.0
     # via httpx
 astral==2.2
     # via homeassistant
-async-interrupt==1.2.0
+async-interrupt==1.2.2
     # via
     #   habluetooth
     #   homeassistant
 async-timeout==5.0.1
-    # via snitun
+    # via
+    #   ha-ffmpeg
+    #   hass-nabucasa
+    #   snitun
 atomicwrites-homeassistant==1.4.1
     # via
     #   hass-nabucasa
     #   homeassistant
-attrs==24.2.0
+attrs==25.1.0
     # via
     #   aiohttp
     #   hass-nabucasa
@@ -58,47 +70,51 @@ awesomeversion==24.6.0
     # via homeassistant
 bcrypt==4.2.0
     # via homeassistant
-bleak==0.22.3
+bleak==1.1.1
     # via
     #   bleak-retry-connector
     #   bluetooth-adapters
     #   habluetooth
-bleak-retry-connector==3.6.0
+bleak-retry-connector==4.4.4
     # via habluetooth
-bluetooth-adapters==0.20.2
+bluetooth-adapters==2.1.1
     # via
     #   bleak-retry-connector
     #   bluetooth-auto-recovery
     #   habluetooth
-bluetooth-auto-recovery==1.4.2
+bluetooth-auto-recovery==1.5.3
     # via habluetooth
-bluetooth-data-tools==1.20.0
+bluetooth-data-tools==1.28.4
     # via habluetooth
-boto3==1.35.86
+boto3==1.40.73
     # via pycognito
-botocore==1.35.86
+botocore==1.40.73
     # via
     #   boto3
     #   s3transfer
 btsocket==0.3.0
-    # via bluetooth-auto-recovery
-certifi==2024.12.14
+    # via
+    #   bluetooth-auto-recovery
+    #   habluetooth
+certifi==2025.11.12
     # via
     #   homeassistant
     #   httpcore
     #   httpx
     #   requests
-cffi==1.17.1
+cffi==2.0.0
     # via
     #   cryptography
     #   pycares
-charset-normalizer==3.4.0
+charset-normalizer==3.4.4
     # via requests
-ciso8601==2.3.1
+ciso8601==2.3.2
     # via
     #   hass-nabucasa
     #   homeassistant
-cryptography==43.0.1
+cronsim==2.6
+    # via homeassistant
+cryptography==44.0.1
     # via
     #   acme
     #   bluetooth-data-tools
@@ -109,98 +125,118 @@ cryptography==43.0.1
     #   pyopenssl
     #   securetar
     #   snitun
-dbus-fast==2.24.4
+dbus-fast==2.45.1
     # via
     #   bleak
     #   bleak-retry-connector
     #   bluetooth-adapters
+    #   habluetooth
 envs==1.4
     # via pycognito
-fnv-hash-fast==1.0.2
+fnv-hash-fast==1.5.0
     # via homeassistant
 fnvhash==0.1.0
     # via fnv-hash-fast
-frozenlist==1.5.0
+frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
-h11==0.14.0
+greenlet==3.2.4
+    # via sqlalchemy
+h11==0.16.0
     # via httpcore
-habluetooth==3.6.0
+ha-ffmpeg==3.2.2
+    # via homeassistant
+habluetooth==5.7.0
     # via home-assistant-bluetooth
-hass-nabucasa==0.86.0
+hass-nabucasa==0.96.0
     # via homeassistant
-home-assistant-bluetooth==1.13.0
+hassil==2.2.3
     # via homeassistant
-homeassistant==2024.12.5
+home-assistant-bluetooth==1.13.1
+    # via homeassistant
+home-assistant-intents==2025.5.7
+    # via homeassistant
+homeassistant==2025.5.2
     # via ha-solarman (pyproject.toml)
-httpcore==1.0.7
+httpcore==1.0.9
     # via httpx
-httpx==0.27.2
+httpx==0.28.1
     # via homeassistant
-idna==3.10
+idna==3.11
     # via
     #   anyio
     #   httpx
     #   requests
     #   yarl
 ifaddr==0.2.0
-    # via homeassistant
-jinja2==3.1.4
+    # via
+    #   homeassistant
+    #   zeroconf
+jinja2==3.1.6
     # via homeassistant
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-josepy==1.14.0
+josepy==1.15.0
     # via acme
 lru-dict==1.3.0
     # via homeassistant
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via jinja2
-mashumaro==3.15
+mashumaro==3.17
     # via
     #   aiohasupervisor
     #   webrtc-models
-multidict==6.1.0
+multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
-orjson==3.10.12
+mutagen==1.47.0
+    # via homeassistant
+numpy==2.2.2
+    # via
+    #   homeassistant
+    #   pyturbojpeg
+orjson==3.10.18
     # via
     #   aiohasupervisor
     #   homeassistant
     #   webrtc-models
-packaging==24.2
+packaging==25.0
     # via homeassistant
-pillow==11.0.0
+pillow==11.2.1
     # via homeassistant
-propcache==0.2.1
+propcache==0.3.1
     # via
     #   aiohttp
+    #   annotatedyaml
     #   homeassistant
     #   yarl
-psutil==6.1.1
+psutil==7.1.3
     # via psutil-home-assistant
 psutil-home-assistant==0.0.1
     # via homeassistant
-pycares==4.5.0
+pycares==4.11.0
     # via aiodns
 pycognito==2024.5.1
     # via hass-nabucasa
-pycparser==2.22
+pycparser==2.23
     # via cffi
 pyjwt[crypto]==2.10.1
     # via
     #   hass-nabucasa
     #   homeassistant
     #   pycognito
-pyopenssl==24.2.1
+pymicro-vad==1.0.1
+    # via homeassistant
+pyopenssl==25.0.0
     # via
     #   acme
     #   homeassistant
     #   josepy
-pyrfc3339==2.0.1
+pyrfc3339==2.1.0
     # via acme
 pyric==0.1.6.3
     # via bluetooth-auto-recovery
@@ -208,36 +244,39 @@ pyserial==3.5
     # via umodbus
 pysolarmanv5==3.0.6
     # via ha-solarman (pyproject.toml)
+pyspeex-noise==1.0.2
+    # via homeassistant
 python-dateutil==2.9.0.post0
     # via botocore
 python-slugify==8.0.4
     # via homeassistant
-pytz==2024.2
+pyturbojpeg==1.7.5
+    # via homeassistant
+pytz==2025.2
     # via
     #   acme
     #   astral
 pyyaml==6.0.2
     # via
-    #   ha-solarman (pyproject.toml)
+    #   annotatedyaml
+    #   hassil
     #   homeassistant
 requests==2.32.3
     # via
     #   acme
     #   homeassistant
     #   pycognito
-s3transfer==0.10.4
+s3transfer==0.14.0
     # via boto3
-securetar==2024.11.0
+securetar==2025.2.1
     # via homeassistant
 six==1.17.0
     # via python-dateutil
 sniffio==1.3.1
-    # via
-    #   anyio
-    #   httpx
-snitun==0.39.1
+    # via anyio
+snitun==0.40.0
     # via hass-nabucasa
-sqlalchemy==2.0.36
+sqlalchemy==2.0.40
     # via homeassistant
 standard-aifc==3.13.0
     # via homeassistant
@@ -247,21 +286,23 @@ standard-telnetlib==3.13.0
     # via homeassistant
 text-unidecode==1.3
     # via python-slugify
-typing-extensions==4.12.2
+typing-extensions==4.15.0
     # via
     #   homeassistant
     #   mashumaro
     #   sqlalchemy
-tzdata==2024.2
+tzdata==2025.2
     # via aiozoneinfo
-uart-devices==0.1.0
+uart-devices==0.1.1
     # via bluetooth-adapters
-ulid-transform==1.0.2
+ulid-transform==1.4.0
     # via homeassistant
 umodbus==1.0.4
     # via
     #   ha-solarman (pyproject.toml)
     #   pysolarmanv5
+unicode-rbnf==2.4.0
+    # via hassil
 urllib3==1.26.20
     # via
     #   botocore
@@ -271,14 +312,15 @@ usb-devices==0.4.5
     # via
     #   bluetooth-adapters
     #   bluetooth-auto-recovery
-uv==0.5.4
+uv==0.7.1
     # via homeassistant
 voluptuous==0.15.2
     # via
+    #   annotatedyaml
     #   homeassistant
     #   voluptuous-openapi
     #   voluptuous-serialize
-voluptuous-openapi==0.0.5
+voluptuous-openapi==0.1.0
     # via homeassistant
 voluptuous-serialize==2.6.0
     # via homeassistant
@@ -286,11 +328,11 @@ webrtc-models==0.3.0
     # via
     #   hass-nabucasa
     #   homeassistant
-yarl==1.18.3
+yarl==1.20.0
     # via
-    #   aiohasupervisor
     #   aiohttp
     #   homeassistant
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
+zeroconf==0.147.0
+    # via
+    #   aiohttp-asyncmdnsresolver
+    #   homeassistant
