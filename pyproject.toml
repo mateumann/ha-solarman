@@ -1,9 +1,9 @@
 [project]
 name = "ha-solarman"
-version = "1.6.3"
+version = "1.7.0"
 description = "Home Assistant component for Solarman collectors used with a variety of inverters."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = { text = "Apache-2.0" }
 authors = [
     { name = "Jonathan McCrohan", email = "jmccrohan@gmail.com" },
@@ -17,8 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "umodbus",
-    "pyyaml",
-    "homeassistant",
+    "homeassistant==2025.5.2",
     "pysolarmanv5",
 ]
 
@@ -26,7 +25,7 @@ dependencies = [
 [tool.ruff]
 line-length = 79
 indent-width = 4
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
