@@ -1,6 +1,6 @@
 [project]
 name = "ha-solarman"
-version = "1.7.0"
+version = "1.8.0"
 description = "Home Assistant component for Solarman collectors used with a variety of inverters."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -17,7 +17,8 @@ classifiers = [
 ]
 dependencies = [
     "umodbus",
-    "homeassistant==2025.5.2",
+#    "pyyaml",
+    "homeassistant==2026.5.4",
     "pysolarmanv5",
 ]
 
